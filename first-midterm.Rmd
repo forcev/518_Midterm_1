@@ -1,0 +1,9 @@
+---
+title: "First Midterm"
+author: "INSERT YOUR NAME HERE"
+date: "INSERT TODAY'S DATE HERE"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
