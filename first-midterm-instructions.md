@@ -14,7 +14,7 @@ You are allowed (and expected, if necessary) to use appropriate online resources
 Be sure to cite any resource that you get help from and explain where/how you implemented it - this is part of your [reflection](#3-reflection).
 You are also free to ask questions/clarifications of me as if I am the client, but I have no experience with R or GitHub.
 
-You should start this as early as possible to ensure that you have time to walk away when things are not working to provide you with an opportunity to refocus with fresh eyes.
+You should start this **as early as possible** to ensure that you have time to walk away when things are not working to provide you with an opportunity to refocus with fresh eyes.
 If things are not working, try starting with smaller chunks and make sure the results are doing what you think you told R to do.
 
 Your final report should interweave code, output, and narrative.
