@@ -1,9 +1,49 @@
 ---
 title: "First Midterm"
-author: "INSERT YOUR NAME HERE"
-date: "INSERT TODAY'S DATE HERE"
+author: "Victoria Force"
+date: "10/27/19"
 output: 
   html_document: 
     keep_md: yes
 ---
 
+```{r install_packages, message=FALSE}
+library("tidyverse")
+library("dplyr")
+county_city <- read.csv(file='data/county_city.csv')
+GTD <- read.csv(file='data/GTD.csv')
+population <- read.csv(file='data/population.csv')
+poverty <- read.csv(file='data/poverty.csv')
+county_city <- unique(county_city)
+GTD <- unique(GTD)
+population <- unique(population)
+poverty <- unique(poverty)
+```
+
+```{r overview}
+options(digits=5)
+r_countycity <- subset(county_city, !(state %in% c('AA','AE', 'AL','AK','AP','AR','AS','DE','FM','GU','HI','KY','MD','ME','MH','MT','MP','OK','PR','PW','RI','SD','WI','WY','UT','VI','VT')))
+r_poverty <- subset(poverty, !((State %in% c('AA','AE', 'AL','AK','AP','AR','AS','DE','FM','GU','HI','KY','MD','ME','MH','MT','MP','OK','PR','PW','RI','SD','WI','WY','UT','VI','VT'))))
+r_population <- subset(population, (STNAME %in% c('Arizona','California','Colorado','Connecticut','Florida','Georgia','Idaho','Illinois','Indiana','Iowa','Kansas','Louisiana','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oregon','Pennsylvania','South Carolina','Tennessee','Texas','Virginia','Washington','West Virginia','District of Columbia')))
+#mergeattempt <- join(GTD, newdata, by=c('latitude', 'longitude'))
+```
+
+```{r testing}
+r_countycity$two_county <- NA
+r_countycity$two_county <- paste(r_countycity$county, 'County')
+r_countycity$State <- r_countycity$state
+r_poverty$two_county <- r_poverty$Area_Name
+test <- join(r_countycity, r_poverty)
+test <- subset(test, select = -c(Area_Name, state, longitude, latitude))
+test$provstate <- state.name[match(test$State,state.abb)]
+test$provstate <- as.character(test$provstate)
+test$city <- as.character(test$city)
+GTD$provstate <- as.character(GTD$provstate)
+GTD$city <- as.character(GTD$city)
+test1 <- left_join(GTD,test)
+```
+
+```{r chunk_4ish}
+test1 <- unique(test1)
+test1 <- subset(test1, select = -c(State, two_county))
+```
