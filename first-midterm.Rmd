@@ -6,7 +6,7 @@ output:
   html_document: 
     keep_md: yes
 ---
-
+Reading in data, removing duplicate observations
 ```{r install_packages, message=FALSE}
 library("tidyverse")
 library("dplyr")
@@ -20,30 +20,57 @@ population <- unique(population)
 poverty <- unique(poverty)
 ```
 
+
+Remove the states from the population, poverty, and county_city dataset that are not in the GTD dataset to make them more manageable.
 ```{r overview}
 options(digits=5)
 r_countycity <- subset(county_city, !(state %in% c('AA','AE', 'AL','AK','AP','AR','AS','DE','FM','GU','HI','KY','MD','ME','MH','MT','MP','OK','PR','PW','RI','SD','WI','WY','UT','VI','VT')))
 r_poverty <- subset(poverty, !((State %in% c('AA','AE', 'AL','AK','AP','AR','AS','DE','FM','GU','HI','KY','MD','ME','MH','MT','MP','OK','PR','PW','RI','SD','WI','WY','UT','VI','VT'))))
 r_population <- subset(population, (STNAME %in% c('Arizona','California','Colorado','Connecticut','Florida','Georgia','Idaho','Illinois','Indiana','Iowa','Kansas','Louisiana','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oregon','Pennsylvania','South Carolina','Tennessee','Texas','Virginia','Washington','West Virginia','District of Columbia')))
-#mergeattempt <- join(GTD, newdata, by=c('latitude', 'longitude'))
 ```
 
 ```{r testing}
+#changing county variable for consistency
 r_countycity$two_county <- NA
 r_countycity$two_county <- paste(r_countycity$county, 'County')
 r_countycity$State <- r_countycity$state
 r_poverty$two_county <- r_poverty$Area_Name
+#merging the county_city and poverty datasets
 test <- join(r_countycity, r_poverty)
 test <- subset(test, select = -c(Area_Name, state, longitude, latitude))
+#edit state names/abbreviations for consistency
 test$provstate <- state.name[match(test$State,state.abb)]
+#make city and state variables character variables
 test$provstate <- as.character(test$provstate)
 test$city <- as.character(test$city)
 GTD$provstate <- as.character(GTD$provstate)
 GTD$city <- as.character(GTD$city)
+test <- unique(test)
+```
+
+```{r populationdataset}
+#cleaning up population dataset
+r_population$provstate <- r_population$STNAME
+r_population$city <- r_population$NAME
+r_population$city <- as.character(r_population$city)
+r_population$provstate <- as.character(r_population$provstate)
+r_population <- unique(r_population)
+r_population <- subset(r_population, select = -c(SUMLEV, STATE, COUNTY, PLACE))
+#merge GTD to poverty and county_city dataset, remove duplicate observations.
 test1 <- left_join(GTD,test)
+test1 <- unique(test1)
 ```
 
 ```{r chunk_4ish}
-test1 <- unique(test1)
-test1 <- subset(test1, select = -c(State, two_county))
+#merge in population dataset
+test1$fullcity <- paste(test1$city, 'city')
+test1 <- subset(test1, select = -c(State, two_county, city))
+r_population$fullcity <- r_population$city
+r_population <- subset(r_population, select = -c(NAME, STNAME, city))
+final <- left_join(test1, r_population)
+```
+
+```{r cleanitup}
+final <- unique(final)
+
 ```
