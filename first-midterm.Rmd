@@ -12,7 +12,7 @@ library("tidyverse")
 library("dplyr")
 county_city <- read.csv(file='data/county_city.csv')
 GTD <- read.csv(file='data/GTD.csv')
-population <- read.csv(file='data/population.csv')
+population <- read.csv(file='data/population.csv', encoding = "UTF-8")
 poverty <- read.csv(file='data/poverty.csv')
 county_city <- unique(county_city)
 GTD <- unique(GTD)
@@ -23,37 +23,20 @@ poverty <- unique(poverty)
 
 Remove the states from the population, poverty, and county_city dataset that are not in the GTD dataset to make them more manageable.
 ```{r overview}
-options(digits=5)
 r_countycity <- subset(county_city, !(state %in% c('AA','AE', 'AL','AK','AP','AR','AS','DE','FM','GU','HI','KY','MD','ME','MH','MT','MP','OK','PR','PW','RI','SD','WI','WY','UT','VI','VT')))
 r_poverty <- subset(poverty, !((State %in% c('AA','AE', 'AL','AK','AP','AR','AS','DE','FM','GU','HI','KY','MD','ME','MH','MT','MP','OK','PR','PW','RI','SD','WI','WY','UT','VI','VT'))))
 r_population <- subset(population, (STNAME %in% c('Arizona','California','Colorado','Connecticut','Florida','Georgia','Idaho','Illinois','Indiana','Iowa','Kansas','Louisiana','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oregon','Pennsylvania','South Carolina','Tennessee','Texas','Virginia','Washington','West Virginia','District of Columbia')))
-GTD$provstate <- as.character(GTD$provstate)
-GTD$city <- as.character(GTD$city)
-r_poverty$State <- as.character(r_poverty$State)
-GTD$city[GTD$city=="Ingelwood"] <- "Inglewood"
-GTD$city[GTD$city=="Blooming Grove"] <- "Blooming Grove township"
-GTD$city[GTD$city=="Colerain"] <- "Colerain township"
+r_population <- subset(r_population, !(PLACE %in% c(0,39003,11810,25170,99990)))
 ```
 
-```{r testing}
-#changing county variable for consistency
+```{r editvars}
 r_countycity$two_county <- NA
 r_countycity$two_county <- paste(r_countycity$county, 'County')
 r_countycity$State <- as.character(r_countycity$state)
 r_poverty$two_county <- as.character(r_poverty$Area_Name)
-r_countycity$city[r_countycity$city=="Mc Cook"] <- "McCook"
-#merging the county_city and poverty datasets
-PA_BG <- data.frame(c(0,0),c(0,0),c("Blooming Grove township","Colerain township"),c("PA","PA"),c("Pike","Lancaster"), c("Pike County","Lancaster County"),c("PA","PA"))
-names(PA_BG) <- c("latitude","longitude","city","state","county","two_county","State")
-r_countycity <- rbind(r_countycity, PA_BG)
-pov_countcity <- inner_join(r_countycity, r_poverty)
-pov_countcity <- subset(pov_countcity, select = -c(Area_Name, state, longitude, latitude))
-#edit state names/abbreviations for consistency
-pov_countcity$provstate <- state.name[match(pov_countcity$State,state.abb)]
-#make city and state variables character variables
-pov_countcity$provstate <- as.character(pov_countcity$provstate)
-pov_countcity$city <- as.character(pov_countcity$city)
-pov_countcity <- unique(pov_countcity)
+r_poverty$two_county[r_poverty$two_county=="East Baton Rouge Parish"] <- "East Baton Rouge County"
+r_poverty$two_county[r_poverty$two_county=="St. Lucie County"] <- "Saint Lucie County"
+r_poverty$State <- as.character(r_poverty$State)
 ```
 
 ```{r populationdataset}
@@ -66,26 +49,90 @@ r_population <- unique(r_population)
 r_population$city[r_population$city=="Century town"] <- "Century city"
 ```
 
+```{r firstmerge}
+#adding locations that are in GTD/population/poverty but not in county_city into count_city
+PA_BG <- data.frame(c(0,0),c(0,0),c("Blooming Grove township","Colerain township"),c("PA","PA"),c("Pike","Lancaster"), c("Pike County","Lancaster County"),c("PA","PA"))
+names(PA_BG) <- c("latitude","longitude","city","state","county","two_county","State")
+r_countycity <- rbind(r_countycity, PA_BG)
 
-```{r merging}
+r_countycity$city[r_countycity$city=="Mc Cook"] <- "McCook"
+
+#merging the county_city and poverty datasets
+pov_countcity <- inner_join(r_countycity, r_poverty)
+
+#edit state names/abbreviations for consistency
+pov_countcity$provstate <- state.name[match(pov_countcity$State,state.abb)]
+#make city and state variables character variables
+pov_countcity$provstate <- as.character(pov_countcity$provstate)
+pov_countcity$city <- as.character(pov_countcity$city)
+pov_countcity <- unique(pov_countcity)
+pov_countcity$city[pov_countcity$city=="New York"] <- "New York City"
+pov_countcity$city <- toupper(pov_countcity$city)
+```
+
+```{r remove_vars}
+pov_countcity <- subset(pov_countcity, select = -c(Area_Name, state, longitude, latitude))
+```
+
+```{r secondmerge}
 #merge GTD to poverty and county_city dataset, remove duplicate observations.
+GTD$provstate <- as.character(GTD$provstate)
+GTD$city <- as.character(GTD$city)
+```
+
+```{r fasdfasd}
+GTD$city[GTD$city=="Ingelwood"] <- "Inglewood"
+GTD$city[GTD$city=="Blooming Grove"] <- "Blooming Grove township"
+GTD$city[GTD$city=="Colerain"] <- "Colerain township"
+```
+
+```{r thaskdf}
+GTD$city <- toupper(as.character(GTD$city))
 GTD_pov_CC <- left_join(GTD,pov_countcity)
 GTD_pov_CC <- unique(GTD_pov_CC)
 ```
 
-```{r chunk_4ish}
-#merge in population dataset
-GTD_pov_CC$fullcity <- paste(GTD_pov_CC$city, 'city')
-GTD_pov_CC <- subset(GTD_pov_CC, select = -c(State, two_county, city))
-GTD_pov_CC$fullcity[GTD_pov_CC$fullcity=="Blooming Grove township city"] <- "Blooming Grove township"
-GTD_pov_CC$fullcity[GTD_pov_CC$fullcity=="Colerain township city"] <- "Colerain township"
+```{r changenames}
+GTD_pov_CC$fullcity <- paste(GTD_pov_CC$city, 'CITY')
+```
+
+```{r edit names}
+GTD_pov_CC$fullcity[GTD_pov_CC$fullcity=="BLOOMING GROVE TOWNSHIP CITY"] <- "BLOOMING GROVE TOWNSHIP"
+GTD_pov_CC$fullcity[GTD_pov_CC$fullcity=="COLERAIN TOWNSHIP CITY"] <- "COLERAIN TOWNSHIP"
+GTD_pov_CC$fullcity[GTD_pov_CC$fullcity=="NEW YORK CITY CITY"] <- "NEW YORK CITY"
+GTD_pov_CC$fullcity[GTD_pov_CC$fullcity=="NEW CITY CITY"] <- "NEW CITY"
+
+
 r_population$fullcity <- r_population$city
 r_population$fullcity[r_population$fullcity=="Bullard town"] <- "Bullard city"
 r_population$fullcity[r_population$fullcity=="Chapel Hill town"] <- "Chapel Hill city"
+r_population$fullcity[r_population$fullcity=="New York city"] <- "New York City"
+r_population$fullcity[r_population$fullcity=="West Orange township"] <- "West Orange city"
+r_population$fullcity[r_population$fullcity=="Macon County"] <- "Macon city"
+r_population$fullcity[r_population$fullcity=="Orland Park village"] <- "Orland Park city"
+r_population$fullcity[r_population$fullcity=="Nashville town"] <- "Nashville city"
+r_population$fullcity[r_population$fullcity=="Strasburg borough"] <- "Strasburg city"
+r_population$fullcity[r_population$fullcity=="Hillsborough town"] <- "Hillsborough city"
+r_population$fullcity[r_population$fullcity=="Seaside Park borough"] <- "Seaside Park city"
+r_population$fullcity[r_population$fullcity=="Endicott village"] <- "Endicott city"
+r_population$fullcity[r_population$fullcity=="Watertown Town city"] <- "Watertown city"
+r_population$fullcity[r_population$fullcity=="Tyngsborough town"] <- "Tyngsborough city"
+```
+
+```{r removevarsagain}
+GTD_pov_CC$fullcity <- toupper(GTD_pov_CC$fullcity)
+r_population$fullcity <- toupper(r_population$fullcity)
+GTD_pov_CC <- subset(GTD_pov_CC, select = -c(State, two_county, city))
 r_population <- subset(r_population, select = -c(NAME, STNAME, city, SUMLEV, STATE, COUNTY, PLACE))
-final <- left_join(GTD_pov_CC, r_population)
 ```
 
 ```{r cleanitup}
+final <- left_join(GTD_pov_CC, r_population)
 final <- unique(final)
+```
+
+```{r faster}
+final %>%
+  select(provstate, fullcity, PCTPOVALL_2015) %>%
+  arrange(PCTPOVALL_2015)
 ```
