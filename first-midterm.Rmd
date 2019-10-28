@@ -26,6 +26,7 @@ Remove the states from the population, poverty, and county_city dataset that are
 r_countycity <- subset(county_city, !(state %in% c('AA','AE', 'AL','AK','AP','AR','AS','DE','FM','GU','HI','KY','MD','ME','MH','MT','MP','OK','PR','PW','RI','SD','WI','WY','UT','VI','VT')))
 r_poverty <- subset(poverty, !((State %in% c('AA','AE', 'AL','AK','AP','AR','AS','DE','FM','GU','HI','KY','MD','ME','MH','MT','MP','OK','PR','PW','RI','SD','WI','WY','UT','VI','VT'))))
 r_population <- subset(population, (STNAME %in% c('Arizona','California','Colorado','Connecticut','Florida','Georgia','Idaho','Illinois','Indiana','Iowa','Kansas','Louisiana','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oregon','Pennsylvania','South Carolina','Tennessee','Texas','Virginia','Washington','West Virginia','District of Columbia')))
+r_population$PLACE[r_population$PLACE==0 & r_population$NAME %in% c("Blooming Grove township","Colerain township","Macon County","West Orange township","Tyngsborough town","Indianapolis city")] <- 1
 r_population <- subset(r_population, !(PLACE %in% c(0,39003,11810,25170,99990)))
 ```
 
@@ -35,6 +36,8 @@ r_countycity$two_county <- paste(r_countycity$county, 'County')
 r_countycity$State <- as.character(r_countycity$state)
 r_poverty$two_county <- as.character(r_poverty$Area_Name)
 r_poverty$two_county[r_poverty$two_county=="East Baton Rouge Parish"] <- "East Baton Rouge County"
+r_poverty$two_county[r_poverty$two_county=="Orleans Parish"] <- "Orleans County"
+r_poverty$two_county[r_poverty$two_county=="Lafayette Parish"] <- "Lafayette County"
 r_poverty$two_county[r_poverty$two_county=="St. Lucie County"] <- "Saint Lucie County"
 r_poverty$State <- as.character(r_poverty$State)
 ```
@@ -54,9 +57,14 @@ r_population$city[r_population$city=="Century town"] <- "Century city"
 PA_BG <- data.frame(c(0,0),c(0,0),c("Blooming Grove township","Colerain township"),c("PA","PA"),c("Pike","Lancaster"), c("Pike County","Lancaster County"),c("PA","PA"))
 names(PA_BG) <- c("latitude","longitude","city","state","county","two_county","State")
 r_countycity <- rbind(r_countycity, PA_BG)
-
+r_countycity$city <- as.character(r_countycity$city)
 r_countycity$city[r_countycity$city=="Mc Cook"] <- "McCook"
+r_countycity$city[r_countycity$city=="Tyngsboro"] <- "Tyngsborough"
+r_countycity$two_county[r_countycity$two_county=="Saint Louis County"] <- "St. Louis County"
+r_countycity$two_county[r_countycity$two_county=="District Of Columbia County"] <- "District of Columbia"
+```
 
+```{r again}
 #merging the county_city and poverty datasets
 pov_countcity <- inner_join(r_countycity, r_poverty)
 
@@ -67,6 +75,7 @@ pov_countcity$provstate <- as.character(pov_countcity$provstate)
 pov_countcity$city <- as.character(pov_countcity$city)
 pov_countcity <- unique(pov_countcity)
 pov_countcity$city[pov_countcity$city=="New York"] <- "New York City"
+pov_countcity$city[pov_countcity$city=="Saint Louis"] <- "St. Louis City"
 pov_countcity$city <- toupper(pov_countcity$city)
 ```
 
@@ -84,10 +93,12 @@ GTD$city <- as.character(GTD$city)
 GTD$city[GTD$city=="Ingelwood"] <- "Inglewood"
 GTD$city[GTD$city=="Blooming Grove"] <- "Blooming Grove township"
 GTD$city[GTD$city=="Colerain"] <- "Colerain township"
+GTD$city[GTD$city=="ST. LOUIS"] <- "St. Louis city"
+pov_countcity$provstate[pov_countcity$State=="DC"] <- "District of Columbia"
+GTD$city <- toupper(as.character(GTD$city))
 ```
 
 ```{r thaskdf}
-GTD$city <- toupper(as.character(GTD$city))
 GTD_pov_CC <- left_join(GTD,pov_countcity)
 GTD_pov_CC <- unique(GTD_pov_CC)
 ```
@@ -103,20 +114,19 @@ GTD_pov_CC$fullcity[GTD_pov_CC$fullcity=="NEW YORK CITY CITY"] <- "NEW YORK CITY
 GTD_pov_CC$fullcity[GTD_pov_CC$fullcity=="NEW CITY CITY"] <- "NEW CITY"
 
 
-r_population$fullcity <- r_population$city
-r_population$fullcity[r_population$fullcity=="Bullard town"] <- "Bullard city"
-r_population$fullcity[r_population$fullcity=="Chapel Hill town"] <- "Chapel Hill city"
-r_population$fullcity[r_population$fullcity=="New York city"] <- "New York City"
-r_population$fullcity[r_population$fullcity=="West Orange township"] <- "West Orange city"
-r_population$fullcity[r_population$fullcity=="Macon County"] <- "Macon city"
-r_population$fullcity[r_population$fullcity=="Orland Park village"] <- "Orland Park city"
-r_population$fullcity[r_population$fullcity=="Nashville town"] <- "Nashville city"
-r_population$fullcity[r_population$fullcity=="Strasburg borough"] <- "Strasburg city"
-r_population$fullcity[r_population$fullcity=="Hillsborough town"] <- "Hillsborough city"
-r_population$fullcity[r_population$fullcity=="Seaside Park borough"] <- "Seaside Park city"
-r_population$fullcity[r_population$fullcity=="Endicott village"] <- "Endicott city"
-r_population$fullcity[r_population$fullcity=="Watertown Town city"] <- "Watertown city"
-r_population$fullcity[r_population$fullcity=="Tyngsborough town"] <- "Tyngsborough city"
+r_population$fullcity <- toupper(r_population$city)
+r_population$fullcity[r_population$fullcity=="BULLARD TOWN"] <- "Bullard city"
+r_population$fullcity[r_population$fullcity=="CHAPEL HILL TOWN"] <- "Chapel Hill city"
+r_population$fullcity[r_population$fullcity=="WEST ORANGE TOWNSHIP"] <- "West Orange city"
+r_population$fullcity[r_population$fullcity=="MACON COUNTY"] <- "Macon city"
+r_population$fullcity[r_population$fullcity=="ORLAND PARK VILLAGE"] <- "Orland Park city"
+r_population$fullcity[r_population$fullcity=="NASHVILLE TOWN"] <- "Nashville city"
+r_population$fullcity[r_population$fullcity=="STRASBURG BOROUGH"] <- "Strasburg city"
+r_population$fullcity[r_population$fullcity=="HILLSBOROUGH TOWN"] <- "Hillsborough city"
+r_population$fullcity[r_population$fullcity=="SEASIDE PARK BOROUGH"] <- "Seaside Park city"
+r_population$fullcity[r_population$fullcity=="ENDICOTT VILLAGE"] <- "Endicott city"
+r_population$fullcity[r_population$fullcity=="WATERTOWN TOWN CITY"] <- "Watertown city"
+r_population$fullcity[r_population$fullcity=="TYNGSBOROUGH TOWN"] <- "Tyngsborough city"
 ```
 
 ```{r removevarsagain}
@@ -124,6 +134,7 @@ GTD_pov_CC$fullcity <- toupper(GTD_pov_CC$fullcity)
 r_population$fullcity <- toupper(r_population$fullcity)
 GTD_pov_CC <- subset(GTD_pov_CC, select = -c(State, two_county, city))
 r_population <- subset(r_population, select = -c(NAME, STNAME, city, SUMLEV, STATE, COUNTY, PLACE))
+
 ```
 
 ```{r cleanitup}
@@ -132,7 +143,39 @@ final <- unique(final)
 ```
 
 ```{r faster}
-final %>%
-  select(provstate, fullcity, PCTPOVALL_2015) %>%
-  arrange(PCTPOVALL_2015)
+final$summary <- as.character(final$summary)
+midterm_data_forcev.csv <- final[!duplicated(final$summary),]
+midterm_data_forcev.csv <- midterm_data_forcev.csv %>% mutate(avg_population = ((POPESTIMATE2013 + POPESTIMATE2014 + POPESTIMATE2015 + POPESTIMATE2016)/4)/100, casualties = nkill + nwound)
+midterm_data_forcev.csv$MEDHHINC_2015 <- as.numeric(midterm_data_forcev.csv$MEDHHINC_2015)
+midterm_data_forcev.csv[,'individual'] <- factor(midterm_data_forcev.csv[,'individual'])
+midterm_data_forcev.csv[,'claimed'] <- factor(midterm_data_forcev.csv[,'claimed'])
+```
+
+```{r one}
+p <- ggplot(midterm_data_forcev.csv, mapping = aes(x=longitude, y=latitude, color=avg_population)) + geom_point(alpha = (1/4), size = 2)
+p + labs(title="Map of United States", fill="Average population, in hundreds")
+a <- ggplot(midterm_data_forcev.csv, mapping = aes(x=longitude, y=latitude, color=PCTPOVALL_2015)) + geom_point(alpha = (1/4), size = 2)
+b <- ggplot(midterm_data_forcev.csv, mapping = aes(x=longitude, y=latitude, color=PCTPOV017_2015)) + geom_point(alpha = (1/4), size = 2)
+c <- ggplot(midterm_data_forcev.csv, mapping = aes(x=longitude, y=latitude, color=MEDHHINC_2015)) + geom_point(alpha = (1/4), size = 2)
+a
+b
+c
+```
+
+```{r two}
+d <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=individual)) + geom_bar(stat="count", position="stack")
+e <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=claimed)) + geom_bar(stat="count", position="stack")
+d
+e
+```
+
+```{r three}
+f <- ggplot(midterm_data_forcev.csv, mapping = aes(x=avg_population, y=casualties)) + geom_point(alpha = (1/4), size = 2)
+g <- ggplot(midterm_data_forcev.csv, mapping = aes(x=PCTPOVALL_2015, y=casualties)) + geom_point(alpha = (1/4), size = 2)
+h <- ggplot(midterm_data_forcev.csv, mapping = aes(x=PCTPOV017_2015, y=casualties)) + geom_point(alpha = (1/4), size = 2)
+i  <- ggplot(midterm_data_forcev.csv, mapping = aes(x=MEDHHINC_2015, y=casualties)) + geom_point(alpha = (1/4), size = 2)
+f
+g
+h
+i
 ```
