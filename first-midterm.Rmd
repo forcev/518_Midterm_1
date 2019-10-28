@@ -29,13 +29,13 @@ r_population$PLACE[r_population$PLACE==0 & r_population$NAME %in% c("Blooming Gr
 r_population <- subset(r_population, !(PLACE %in% c(0,39003,11810,25170,99990)))
 ```
 
-Renaming and adding variables to the population, poverty, and county_cty datasets to make merging possible
+Renaming and adding variables to the population, poverty, and county_city datasets to make merging possible
 ```{r editvars}
 #r_countycity
 r_countycity$two_county <- NA
 r_countycity$two_county <- paste(r_countycity$county, 'County')
 r_countycity$State <- as.character(r_countycity$state)
-#adding locations that are in GTD/population/poverty but not in county_city into count_city
+#adding locations that are in GTD/population/poverty but not in county_city into county_city
 PA_BG <- data.frame(c(0,0),c(0,0),c("Blooming Grove township","Colerain township", "Corinth","Overland Park"),c("PA","PA","TX","KS"),c("Pike","Lancaster","Denton","Johnson"), c("Pike County","Lancaster County","Denton County","Johnson County"),c("PA","PA","TX","KS"))
 names(PA_BG) <- c("latitude","longitude","city","state","county","two_county","State")
 r_countycity <- rbind(r_countycity, PA_BG)
@@ -143,6 +143,7 @@ final <- left_join(GTD_pov_CC, r_population)
 final <- unique(final)
 ```
 NOTE: Princeton city and Warrenville city are not present in the population dataset, and so the population values are are missing in the final data set for those observations. West city is not present in the poverty dataset, so the poverty values are missing in the final dataset for this observation. Lake Los Angeles is missing in both the poverty and population datasets, so those values are missing for that observation.
+
 Creating final dataset. Changes the format of particular variables, as well as creates variables necessary for future analysis.
 ```{r finaldataset}
 final$summary <- as.character(final$summary)
@@ -169,7 +170,7 @@ c + labs(title = "Map of United States", subtitle = "Terrorist attacks and media
 ```
 Overall, not many trends can be identified with these charts. There are too few observations of terrorist attacks to make any definitive statements about the population or poverty rates in the places in which the attacks took place.
 
-
+QUESTION TWO
 ```{r two}
 d <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=individual)) + geom_bar(stat="count", position="stack")
 e <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=claimed)) + geom_bar(stat="count", position="stack")
@@ -178,6 +179,7 @@ e + labs(fill="Claimed?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8
 ```
 Attacks were less frequently carried out by unaffiliated individuals, and and slightly less often claimed by a group or individual. This also shows that terrorist attacks appear with the a similar rate of frequency as general crime - higher in the summer, lower in the winter. I would hypothesize that there is a slight increase in attacks arround December to be due to the holidays, so there are an increased number of targets with a lot of people. 
 
+QUESTiON THREE
 ```{r three}
 onepoint <- subset(midterm_data_forcev.csv, fullcity=="WEST CITY")
 f <- ggplot(midterm_data_forcev.csv, mapping = aes(x=avg_population, y=casualties)) + geom_point(alpha = (1/2), size = 2)
@@ -192,6 +194,7 @@ i + labs(title = "Median Income vs. casualties")
 
 The majority of the terrorist attacks had fewer than 25 casualities, and occured in places with a population less than 2,000,000. The percent of the local population living in poverty is fairly evenly distributed. The median income is skewed left.
 
+QUESTION FOUR
 ```{r four}
 midterm_data_forcev.csv$AttackName[midterm_data_forcev.csv$attacktype1 %in% c(1,4,5)] <- "Other"
 midterm_data_forcev.csv$AttackName[midterm_data_forcev.csv$attacktype1==2] <- "Armed Assault"
@@ -210,6 +213,7 @@ m + labs(title = "Median Income vs. Attack Type")
 
 The unarmed assault cateogry is definitely of the most interest to me in these graphs. It has the widest range of population by far, but the narrowest range for both poverty stats and median income. It also has the highest median income of all the attack types. It only has 6 observations, but other categories also have low numbers and do not have similar characteristics.
 
+QUESTION FIVE
 ```{r five}
 midterm_data_forcev.csv$property[midterm_data_forcev.csv$property==1] <- "Yes"
 midterm_data_forcev.csv$property[midterm_data_forcev.csv$property==0] <- "No"
