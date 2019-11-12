@@ -172,10 +172,10 @@ Overall, not many trends can be identified with these charts. There are too few 
 
 QUESTION TWO
 ```{r two}
-d <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=individual)) + geom_bar(stat="count", position="stack")
-e <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=claimed)) + geom_bar(stat="count", position="stack")
-d + labs(fill="Individual or group?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,12))
-e + labs(fill="Claimed?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,12))
+d <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=individual)) + geom_bar(stat="count", position=position_dodge())
+e <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=claimed)) + geom_bar(stat="count", position=position_dodge())
+d + labs(title="Frequency of individual or group affiliated attacks by month", fill="Individual or group?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,12))
+e + labs(title="Frequency of attacks claimed or unclaimed by groups by month", fill="Claimed?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,12))
 ```
 Attacks were less frequently carried out by unaffiliated individuals, and and slightly less often claimed by a group or individual. This also shows that terrorist attacks appear with the a similar rate of frequency as general crime - higher in the summer, lower in the winter. I would hypothesize that there is a slight increase in attacks arround December to be due to the holidays, so there are an increased number of targets with a lot of people. 
 
@@ -187,9 +187,9 @@ g <- ggplot(midterm_data_forcev.csv, mapping = aes(x=PCTPOVALL_2015, y=casualtie
 h <- ggplot(midterm_data_forcev.csv, mapping = aes(x=PCTPOV017_2015, y=casualties)) + geom_point(alpha = (1/2), size = 2)
 i  <- ggplot(midterm_data_forcev.csv, mapping = aes(x=MEDHHINC_2015, y=casualties)) + geom_point(alpha = (1/2), size = 2)
 f + geom_point(data=onepoint, colour="red") + geom_text(data=onepoint, label=onepoint$gname, vjust=2) + labs(x="Average population in hundreds", title = "Population vs. Casualties") 
-g + labs(title = "% living in poverty vs. casualties")
-h + labs(title = "% of children living in poverty vs. casualties")
-i + labs(title = "Median Income vs. casualties")
+g + labs(x="% of population living in poverty", title = "% living in poverty vs. casualties")
+h + labs(x="% of population under the age of 18 living in poverty", title = "% of children living in poverty vs. casualties")
+i + labs(x="Median Household Income", title = "Median Income vs. casualties")
 ```
 
 The majority of the terrorist attacks had fewer than 25 casualities, and occured in places with a population less than 2,000,000. The percent of the local population living in poverty is fairly evenly distributed. The median income is skewed left.
@@ -205,10 +205,10 @@ j <- ggplot(midterm_data_forcev.csv, aes(x=AttackName, y=avg_population)) + geom
 k <- ggplot(midterm_data_forcev.csv, aes(x=AttackName, y=PCTPOVALL_2015)) + geom_boxplot()
 l <- ggplot(midterm_data_forcev.csv, aes(x=AttackName, y=PCTPOV017_2015)) + geom_boxplot()
 m <- ggplot(midterm_data_forcev.csv, aes(x=AttackName, y=MEDHHINC_2015)) + geom_boxplot()
-j + labs(title = "Average Population (in hundreds) vs. Attack Type")
-k + labs(title = "% Living in Poverty vs. Attack Type")
-l + labs(title = "% of Children Living in Poverty vs. Attack Type")
-m + labs(title = "Median Income vs. Attack Type")
+j + labs(y="Average Population in hundreds", title = "Average Population (in hundreds) vs. Attack Type")
+k + labs(y="% of population living in poverty", title = "% Living in Poverty vs. Attack Type")
+l + labs(y="% of population under the age of 18 living in poverty", title = "% of Children Living in Poverty vs. Attack Type")
+m + labs(y="Median Household Income", title = "Median Income vs. Attack Type")
 ```
 
 The unarmed assault cateogry is definitely of the most interest to me in these graphs. It has the widest range of population by far, but the narrowest range for both poverty stats and median income. It also has the highest median income of all the attack types. It only has 6 observations, but other categories also have low numbers and do not have similar characteristics.
@@ -218,8 +218,10 @@ QUESTION FIVE
 midterm_data_forcev.csv$property[midterm_data_forcev.csv$property==1] <- "Yes"
 midterm_data_forcev.csv$property[midterm_data_forcev.csv$property==0] <- "No"
 midterm_data_forcev.csv$property[midterm_data_forcev.csv$property==-9] <- "Unknown"
-table(midterm_data_forcev.csv$AttackName,midterm_data_forcev.csv$property)
-table(midterm_data_forcev.csv$AttackName,midterm_data_forcev.csv$individual)
+n <- table(midterm_data_forcev.csv$AttackName,midterm_data_forcev.csv$property)
+p <- table(midterm_data_forcev.csv$AttackName,midterm_data_forcev.csv$individual)
+prop.table(n,1)
+prop.table(p,1)
 ```
 
 I find the relationship between attack type and property to be confusing here. According to this data, there were 8 bombing/explosion and 4 facilty/infrastructure attacks that resulted in no property damage. How bad were the perpetrators of theses 12 attacks to set off a bomb or specifically target a facility and yet no property damage resulted?

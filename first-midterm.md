@@ -224,15 +224,15 @@ Overall, not many trends can be identified with these charts. There are too few 
 QUESTION TWO
 
 ```r
-d <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=individual)) + geom_bar(stat="count", position="stack")
-e <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=claimed)) + geom_bar(stat="count", position="stack")
-d + labs(fill="Individual or group?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,12))
+d <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=individual)) + geom_bar(stat="count", position=position_dodge())
+e <- ggplot(midterm_data_forcev.csv, mapping = aes(x=imonth, fill=claimed)) + geom_bar(stat="count", position=position_dodge())
+d + labs(title="Frequency of individual or group affiliated attacks by month", fill="Individual or group?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,12))
 ```
 
 ![](first-midterm_files/figure-html/two-1.png)<!-- -->
 
 ```r
-e + labs(fill="Claimed?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,12))
+e + labs(title="Frequency of attacks claimed or unclaimed by groups by month", fill="Claimed?", x="Month") + scale_x_discrete(limits=c(1,2,3,4,5,6,7,8,9,10,11,12))
 ```
 
 ![](first-midterm_files/figure-html/two-2.png)<!-- -->
@@ -256,7 +256,7 @@ f + geom_point(data=onepoint, colour="red") + geom_text(data=onepoint, label=one
 ![](first-midterm_files/figure-html/three-1.png)<!-- -->
 
 ```r
-g + labs(title = "% living in poverty vs. casualties")
+g + labs(x="% of population living in poverty", title = "% living in poverty vs. casualties")
 ```
 
 ```
@@ -266,7 +266,7 @@ g + labs(title = "% living in poverty vs. casualties")
 ![](first-midterm_files/figure-html/three-2.png)<!-- -->
 
 ```r
-h + labs(title = "% of children living in poverty vs. casualties")
+h + labs(x="% of population under the age of 18 living in poverty", title = "% of children living in poverty vs. casualties")
 ```
 
 ```
@@ -276,7 +276,7 @@ h + labs(title = "% of children living in poverty vs. casualties")
 ![](first-midterm_files/figure-html/three-3.png)<!-- -->
 
 ```r
-i + labs(title = "Median Income vs. casualties")
+i + labs(x="Median Household Income", title = "Median Income vs. casualties")
 ```
 
 ```
@@ -299,7 +299,7 @@ j <- ggplot(midterm_data_forcev.csv, aes(x=AttackName, y=avg_population)) + geom
 k <- ggplot(midterm_data_forcev.csv, aes(x=AttackName, y=PCTPOVALL_2015)) + geom_boxplot()
 l <- ggplot(midterm_data_forcev.csv, aes(x=AttackName, y=PCTPOV017_2015)) + geom_boxplot()
 m <- ggplot(midterm_data_forcev.csv, aes(x=AttackName, y=MEDHHINC_2015)) + geom_boxplot()
-j + labs(title = "Average Population (in hundreds) vs. Attack Type")
+j + labs(y="Average Population in hundreds", title = "Average Population (in hundreds) vs. Attack Type")
 ```
 
 ```
@@ -309,7 +309,7 @@ j + labs(title = "Average Population (in hundreds) vs. Attack Type")
 ![](first-midterm_files/figure-html/four-1.png)<!-- -->
 
 ```r
-k + labs(title = "% Living in Poverty vs. Attack Type")
+k + labs(y="% of population living in poverty", title = "% Living in Poverty vs. Attack Type")
 ```
 
 ```
@@ -319,7 +319,7 @@ k + labs(title = "% Living in Poverty vs. Attack Type")
 ![](first-midterm_files/figure-html/four-2.png)<!-- -->
 
 ```r
-l + labs(title = "% of Children Living in Poverty vs. Attack Type")
+l + labs(y="% of population under the age of 18 living in poverty", title = "% of Children Living in Poverty vs. Attack Type")
 ```
 
 ```
@@ -329,7 +329,7 @@ l + labs(title = "% of Children Living in Poverty vs. Attack Type")
 ![](first-midterm_files/figure-html/four-3.png)<!-- -->
 
 ```r
-m + labs(title = "Median Income vs. Attack Type")
+m + labs(y="Median Household Income", title = "Median Income vs. Attack Type")
 ```
 
 ```
@@ -346,31 +346,33 @@ QUESTION FIVE
 midterm_data_forcev.csv$property[midterm_data_forcev.csv$property==1] <- "Yes"
 midterm_data_forcev.csv$property[midterm_data_forcev.csv$property==0] <- "No"
 midterm_data_forcev.csv$property[midterm_data_forcev.csv$property==-9] <- "Unknown"
-table(midterm_data_forcev.csv$AttackName,midterm_data_forcev.csv$property)
+n <- table(midterm_data_forcev.csv$AttackName,midterm_data_forcev.csv$property)
+p <- table(midterm_data_forcev.csv$AttackName,midterm_data_forcev.csv$individual)
+prop.table(n,1)
 ```
 
 ```
 ##                                
-##                                 No Unknown Yes
-##   Armed Assault                 25       5  17
-##   Bombing/Explosion              8       3  15
-##   Facilty/Infrastructure Attack  4       0  57
-##   Other                          3       0   2
-##   Unarmed Assault                6       0   1
+##                                         No    Unknown        Yes
+##   Armed Assault                 0.53191489 0.10638298 0.36170213
+##   Bombing/Explosion             0.30769231 0.11538462 0.57692308
+##   Facilty/Infrastructure Attack 0.06557377 0.00000000 0.93442623
+##   Other                         0.60000000 0.00000000 0.40000000
+##   Unarmed Assault               0.85714286 0.00000000 0.14285714
 ```
 
 ```r
-table(midterm_data_forcev.csv$AttackName,midterm_data_forcev.csv$individual)
+prop.table(p,1)
 ```
 
 ```
 ##                                
 ##                                 Unaffiliated With group or unknown
-##   Armed Assault                           40                     7
-##   Bombing/Explosion                       13                    13
-##   Facilty/Infrastructure Attack           12                    49
-##   Other                                    5                     0
-##   Unarmed Assault                          6                     1
+##   Armed Assault                    0.8510638             0.1489362
+##   Bombing/Explosion                0.5000000             0.5000000
+##   Facilty/Infrastructure Attack    0.1967213             0.8032787
+##   Other                            1.0000000             0.0000000
+##   Unarmed Assault                  0.8571429             0.1428571
 ```
 
 I find the relationship between attack type and property to be confusing here. According to this data, there were 8 bombing/explosion and 4 facilty/infrastructure attacks that resulted in no property damage. How bad were the perpetrators of theses 12 attacks to set off a bomb or specifically target a facility and yet no property damage resulted?
